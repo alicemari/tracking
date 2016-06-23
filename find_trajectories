@@ -1,0 +1,39 @@
+ %% trajectiories with smooth of x, y and then compute velocity
+l=length(P_tracks_all);
+vec_len=[];
+fps=100;
+S=20;
+ for k=1:l
+
+     if P_tracks_all(k).Y<620
+xsm=smooth(P_tracks_all(k).X);
+ysm=smooth(P_tracks_all(k).Y);
+
+for j=2:length(xsm)
+    
+   vx(j)=(xsm(j)-xsm(j-1))./0.01;
+     vy(j)=(ysm(j)-ysm(j-1))./0.01;
+   
+     V=sqrt((vx).^2 + (vy).^2);
+end
+  
+  if length(V)>500
+
+
+figure(2)
+figure(gcf);scatter(xsm,ysm,S,V,'filled')
+%plot(P_tracks_all(k).XFit,P_tracks_all(k).YFit,yy)
+ vfm{k}.V=V;
+ vfm{k}.xsm=xsm;
+ vfm{k}.ysm=ysm;
+  
+%  hold on
+ clear V
+ clear vx
+ clear vy
+  end
+     end
+     k
+     pause
+ end
+ m(k)=mean(V);
