@@ -1,0 +1,36 @@
+h1=figure;
+figure(gcf);scatter(vfm{k}.xsm(1:end-5),vfm{k}.ysm(1:end-5),S,vfm{k}.V(1:end-5),'filled');
+h2=figure;
+h3=figure;
+h4=figure;
+h5=figure;
+axis([0 length(vfm{k}.xsm)*4 0 max(vfm{k}.V)*4]);
+%%
+k=12;
+for i=1:length(vfm{k}.xsm)
+    figure(h1); hold on; scatter(vfm{k}.xsm(i),vfm{k}.ysm(i),30,[1 0 0]); 
+    axis([vfm{k}.xsm(i)*0.918 vfm{k}.xsm(i)*1.02 vfm{k}.ysm(i)*0.918 vfm{k}.ysm(i)*1.02])
+    hold off;
+    figure(h2);
+   
+    plot(vfm{k}.V(1:i));
+    axis([0 length(vfm{k}.xsm) 0 mean(vfm{k}.V)*3]);
+
+    figure(h3)
+     plot(vfm{k}.Van(1:i));
+%        axis([0 length(vfm{k}.xsm) 0 mean(vfm{k}.Van)*3]);
+%  t=linspace(0,V(end),length(V));
+%       plotyy(t(1:i),vfm{k}.Van(1:i)',t(1:i), vfm{k}.V(1:i))
+% %     hold on
+ 
+ figure(h4);
+    plot(vfm{k}.tumbletotal(1:i),'b')
+%     hold on
+%        plot(vfm{k}.tumbling(1:i),'r')
+%     axis([0 length(tumbling) 0 3])
+    
+  
+
+    
+    pause
+end
