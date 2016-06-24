@@ -1,0 +1,58 @@
+%% trajectiories with smooth of x, y and then compute velocity
+l=length(P_tracks_all);
+vec_len=[];
+fps=100;
+S=20;
+ for k=1:length(P_tracks_all)
+ 
+ clear V
+ clear vx
+ clear vy
+ clear teta
+ clear Van
+ clear vxx
+ clear vyy
+     if P_tracks_all(k).Y<620
+xsm=smooth(P_tracks_all(k).X,20);
+ysm=smooth(P_tracks_all(k).Y,20);
+teta=atan(ysm./xsm);
+for j=2:length(xsm)
+    
+   vx(j)=(xsm(j)-xsm(j-1))./0.01;
+     vy(j)=(ysm(j)-ysm(j-1))./0.01;
+   vyy=smooth(vy,10); 
+   vxx=smooth(vx,10);
+     V=sqrt((vxx).^2 + (vyy).^2);
+  Van(j)=abs((teta(j)-teta(j-1)));
+end
+
+
+
+
+  if length(V)>500
+
+
+drtan=diff(teta);
+ vfm{k}.V=V;
+ vfm{k}.xsm=xsm;
+ vfm{k}.ysm=ysm;
+  
+figure(2)
+figure(gcf);scatter(xsm,ysm,S,V,'filled')
+%plot(P_tracks_all(k).XFit,P_tracks_all(k).YFit,yy)
+ vfm{k}.V=V;
+ vfm{k}.xsm=xsm;
+ vfm{k}.ysm=ysm;
+   vfm{k}.Van=Van;
+
+  end
+     end
+     k
+    pause
+ end
+ m(k)=mean(V);
+ 
+ %%
+ t=linspace(0,V(end),length(V));
+ figure(100)
+  plotyy(t(1:end-20),Van(1:end-20)',t(1:end-20), V(1:end-20))
