@@ -1,0 +1,284 @@
+close all
+%% trajectiories with smooth of x, y and then compute velocity
+l=length(P_tracks_all);
+vec_len=[];
+fps=100;
+S=30;
+K=5;
+ for k=K
+ clear vx
+ clear vy
+ clear teta
+ clear Van
+ clear vxx
+ clear vyy
+ clear deltaangy
+ clear deltaangx
+ clear deltaangyy
+ clear deltaangxx
+ clear V
+ clear deltateta
+%  clear teta
+     if P_tracks_all(k).Y<620
+xsm=smooth(P_tracks_all(k).X,30);
+ysm=smooth(P_tracks_all(k).Y,30);
+xsma=smooth(P_tracks_all(k).X,25);
+ysma=smooth(P_tracks_all(k).Y,25);
+% teta=(atand(ysma./xsma));
+for j=11:length(xsm)
+    
+   vx(j)=(xsm(j-2)-xsm(j-3))./0.01;
+     vy(j)=(ysm(j-2)-ysm(j-3))./0.01;
+    deltaangx=xsma(j)-xsma(j-3);
+     deltangy=(ysma(j)-ysma(j-3));
+%        deltaangxx=smooth(deltaangx,10);
+%        deltaangyy=smooth(deltaangy,10);
+     Van(j)=atand((deltangy)./(deltaangx));
+% deltaangy(j)=(teta(j)-teta(j-3));
+% %  deltaangx=xsma(j)-xsma(j-3);
+% =(teta(j)-teta(j-1));
+end
+ vyy=smooth(vy,10); 
+   vxx=smooth(vx,10);
+ V=sqrt((vxx).^2 + (vyy).^2);
+
+
+%  Van=deltateta;
+ 
+%    vyy=smooth(vy,10); 
+%    vxx=smooth(vx,10);
+%      V=sqrt((vxx).^2 + (vyy).^2);
+%           deltaangx=xsma(j)-xsma(j-3);
+%      deltaangy=(ysma(j)-ysma(j-3));
+%      deltaangxx=smooth(deltaangx,10);
+%       deltaangyy=smooth(deltaangy,10);
+%   Van(j-7)=atand((deltaangy)./(deltaangx));
+% end
+
+
+
+
+  if length(V)>500
+
+
+% drtan=diff(teta);
+ vfm{k}.V=V;
+ vfm{k}.xsm=xsm;
+ vfm{k}.ysm=ysm;
+  
+figure(3)
+figure(gcf);scatter(xsma(4:end),ysma(4:end),S,Van(4:end),'filled')
+%plot(P_tracks_all(k).XFit,P_tracks_all(k).YFit,yy)
+ vfm{k}.V=V;
+ vfm{k}.xsm=xsm;
+ vfm{k}.ysm=ysm;
+   vfm{k}.Van=Van;
+
+  end
+     end
+     k
+%      pause
+ end
+ m(k)=mean(V);
+ 
+ %% plot angular and absolute velocity
+ t=linspace(0,V(end),length(V));
+ figure(100)
+  plotyy(t(1:end-20)*10,Van(1:end-20)',t(1:end-20)*10, V(1:end-20))
+
+  %% Vang, decide the tumbling
+%   Van=abs(Van) %%
+  [Pmaxan,locmaxan,w,p]=findpeaks(Van); % maxima 
+ [Pminan,locminan,w,p]=findpeaks(-Van); % minima 
+
+  figure(11)
+plot(Van)
+hold on
+  plot(locmaxan,Pmaxan,'o',locminan,Pminan,'o')
+  beta=2;
+  clear tuman;
+
+  tuman=[];
+  conver=0.0174533;
+  D=0.1;
+  for i=2: length(locmaxan)-1
+%   
+%   for i=15
+      maxi=locmaxan(i);
+      f=locminan(locminan<maxi);
+      t1=f(end);
+      
+      f2=locminan(locminan>maxi);
+      t2=f2(1);
+      
+rate=0;
+    for j=t1+1:t2
+        rate=rate+abs(Van(j)-Van(j-1));
+    end
+%    figure(1000)
+%    plot(rate,'o')
+%    hold on
+%       rate=sum(abs(Van(t1:t2)))*conver;
+      limit=beta*(sqrt(2*D*(t2-t1)*0.01));
+      rate
+%      
+      if rate>=33.5
+        for j=t1:t2
+             vel=abs(Van(maxi)-Van(j));
+             soglia=0.66*abs(Van(maxi));
+             
+             if vel<=soglia
+         tuman=[tuman; j];
+             end
+         end
+      end
+    end
+    
+tumbling2=zeros((length(Van)),1);
+  ff=0;
+for i=5:length(Van)
+    
+  ff=tuman(tuman==i);
+  
+  if ff~=0
+      
+      tumbling2(i)=1;
+  end
+  ff=0;
+end    
+
+hold on
+plot(tumbling2)
+   vfm{k}.tumbling2=tumbling2;
+   
+      %% V_absolute decide the tumbling
+ [Pmax,locmax,w,p]=findpeaks(V); % maxima 
+ [Pmin,locmin,w,p]=findpeaks(-V); % minima 
+figure(10)
+plot(V)
+hold on
+  plot(locmax,Pmax,'o',locmin,Pmin,'o')
+  alpha=0.35
+  clear tum;
+  tum=[];
+  for i=1: length(locmin)-1
+  
+   
+      mini=locmin(i);
+      f=locmax(locmax<mini);
+      t1=f(end);
+      
+      f2=locmax(locmax>mini);
+      t2=f2(1);
+%       
+     deltav=max( (V(t1)- V(mini)),(V(t2)- V(mini)));
+     rate=deltav./(V(mini));
+     
+     
+     if rate>=alpha
+         for j=t1:t2
+             vel=V(j);
+             soglia=V(mini)+0.18*deltav;
+             
+             if vel<=soglia
+         tum=[tum; j]
+             end
+         end
+     
+    end
+  end
+  tumbling=zeros((length(V)),1);
+  ff=0;
+for i=5:length(V)
+    
+  ff=tum(tum==i);
+  
+  if ff~=0
+      
+      tumbling(i)=1;
+  end
+  ff=0;
+end
+hold on
+plot(tumbling)
+vfm{k}.tumbling=tumbling;
+%% see the tumblings
+figure(4)
+plot(tumbling,'r')
+hold on
+plot(tumbling2,'b')
+axis([0 length(tumbling) 0 3])
+
+%% final tumble
+tumbletotal=zeros(length(V),1);
+for i=1:length(V)
+    
+    if tumbling(i)==1
+    if tumbling2(i)==1
+        
+  
+  
+    
+      tumbletotal(i)=1;
+  end
+      end
+ 
+end
+vfm{k}.tumbletotal=tumbletotal;
+figure(300)
+plot(tumbletotal)
+axis([0 length(tumbling) 0 3])
+
+%% visualize the tumbling in trajectories
+
+l=length(P_tracks_all);
+vec_len=[];
+fps=100;
+S=35;
+ for k=K
+     
+%  clear V
+%  clear vx
+%  clear vy
+%  clear teta
+%  clear Van
+%  clear vxx
+%  clear vyy
+%  clear deltaangy
+%  clear deltaangx
+%  clear deltaangyy
+%  clear deltaangxx
+     if P_tracks_all(k).Y<620
+% xsm=smooth(P_tracks_all(k).X,30);
+% ysm=smooth(P_tracks_all(k).Y,30);
+% xsma=smooth(P_tracks_all(k).X,23);
+% % ysma=smooth(P_tracks_all(k).Y,23);
+% teta=atan(ysm./xsm);
+for j=4:length(xsm)
+    
+%    vx(j)=(xsm(j)-xsm(j-1))./0.01;
+%      vy(j)=(ysm(j)-ysm(j-1))./0.01;
+%    vyy=smooth(vy,10); 
+%    vxx=smooth(vx,10);
+%      V=sqrt((vxx).^2 + (vyy).^2);
+     
+end
+
+  if length(V)>500
+
+
+figure(2)
+figure(gcf);scatter(xsm(11:end),ysm(11:end),S,V(11:end),'filled')
+for j=11: length(V)
+    hold on
+    if tumbletotal(j)==1
+       scatter(xsm(j),ysm(j),S,'r','filled')
+    end
+
+end
+  end
+     end
+     k
+%      pause
+ end
+ m(k)=mean(V);
