@@ -11,4 +11,5 @@ for i=1:length(vfm{8}.xsm)
     plot(vfm{8}.V(1:i));
     axis([0 length(vfm{8}.xsm) 0 mean(vfm{8}.V)*3]);
     pause(0.1)
+    
 end
